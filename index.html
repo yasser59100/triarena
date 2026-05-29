@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tri Arena — Team Fitness Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBX2Hq8JLFs7JgIWgCqG6a4fwLyNatAukY",
+  authDomain: "triarena-17f1e.firebaseapp.com",
+  databaseURL: "https://triarena-17f1e-default-rtdb.firebaseio.com",
+  projectId: "triarena-17f1e",
+  storageBucket: "triarena-17f1e.firebasestorage.app",
+  messagingSenderId: "90824296889",
+  appId: "1:90824296889:web:69851c308af75787184e68"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+window._db = db;
+window._ref = ref;
+window._set = set;
+window._get = get;
+window._onValue = onValue;
+window._update = update;
+window._remove = remove;
+window._dbReady = true;
+window.dispatchEvent(new Event('dbready'));
+</script>
+<style>
+:root{
+  --bg:#080808;--s1:#111;--s2:#1a1a1a;--s3:#242424;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+  --text:#f0f0f0;--muted:#777;--muted2:#444;
+  --accent:#e8ff47;--accent-dim:rgba(232,255,71,0.1);--accent-border:rgba(232,255,71,0.3);
+  --orange:#ff6b35;--orange-dim:rgba(255,107,53,0.12);
+  --red:#ff4455;--red-dim:rgba(255,68,85,0.12);
+  --green:#44ffaa;--green-dim:rgba(68,255,170,0.12);
+  --blue:#4488ff;--blue-dim:rgba(68,136,255,0.12);
+  --r:12px;--r-sm:8px;
+  --fd:'Bebas Neue',sans-serif;--fb:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;animation:fadeUp .25s ease;}
+.screen.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.hdr{padding:1rem 1.2rem 0.8rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.hdr-logo{font-family:var(--fd);font-size:1.8rem;color:var(--accent);letter-spacing:2px;line-height:1;}
+.hdr-sub{font-size:0.58rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:2px;}
+.hdr-right{text-align:right;}
+.hdr-role{font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.hdr-author{font-size:0.8rem;font-weight:600;}
+.back-bar{padding:7px 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.nav{display:flex;gap:1px;padding:0 1.2rem;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;background:var(--s1);}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{font-family:var(--fb);font-size:0.7rem;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;padding:0.85rem 1rem;background:none;border:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .2s,border-color .2s;}
+.nav-btn:hover{color:var(--text);}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.content{padding:1.2rem;max-width:720px;margin:0 auto;}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;margin-bottom:1rem;}
+.card-accent{border-color:var(--accent-border);background:linear-gradient(135deg,rgba(232,255,71,0.04),transparent 60%);}
+.card-orange{border-color:rgba(255,107,53,0.3);background:var(--orange-dim);}
+.card-green{border-color:rgba(68,255,170,0.3);background:var(--green-dim);}
+.card-red{border-color:rgba(255,68,85,0.3);background:var(--red-dim);}
+.card-title{font-family:var(--fd);font-size:1rem;letter-spacing:1px;color:var(--muted);margin-bottom:0.8rem;}
+.title-xl{font-family:var(--fd);font-size:1.9rem;letter-spacing:1px;line-height:1;}
+.title-lg{font-family:var(--fd);font-size:1.5rem;letter-spacing:1px;line-height:1;}
+.title-md{font-family:var(--fd);font-size:1.2rem;letter-spacing:1px;}
+.label{font-size:0.63rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.desc{font-size:0.8rem;color:var(--muted);line-height:1.6;}
+input[type=text],input[type=number],input[type=password],select{background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:var(--fb);font-size:0.88rem;padding:9px 12px;width:100%;outline:none;transition:border-color .2s;}
+input:focus,select:focus{border-color:var(--accent);}
+input::placeholder{color:var(--muted2);}
+select option{background:var(--s2);}
+.btn{font-family:var(--fb);font-size:0.78rem;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;padding:10px 18px;border-radius:var(--r-sm);cursor:pointer;transition:all .15s;border:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--accent);color:#080808;}
+.btn-primary:hover{background:#d4eb3a;transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,68,85,0.3);}
+.btn-success{background:var(--green-dim);color:var(--green);border:1px solid rgba(68,255,170,0.3);}
+.btn-orange{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(255,107,53,0.3);}
+.btn-full{width:100%;justify-content:center;}
+.btn-xl{font-size:0.95rem;padding:14px 22px;border-radius:var(--r);}
+.btn-sm{font-size:0.68rem;padding:6px 11px;}
+.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none!important;}
+.badge{display:inline-flex;align-items:center;font-size:0.62rem;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;}
+.badge-accent{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+.badge-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(68,255,170,0.3);}
+.badge-orange{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(255,107,53,0.3);}
+.badge-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,68,85,0.3);}
+.badge-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(68,136,255,0.3);}
+.badge-muted{background:var(--s2);color:var(--muted);border:1px solid var(--border);}
+.chrono{font-family:var(--fd);font-size:3.8rem;color:var(--accent);letter-spacing:4px;text-align:center;line-height:1;padding:0.8rem 0;}
+.chrono-sm{font-family:var(--fd);font-size:1.4rem;letter-spacing:2px;color:var(--accent);}
+.chrono-label{font-size:0.62rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:4px;}
+.alert{padding:11px 14px;border-radius:var(--r-sm);font-size:0.78rem;margin-bottom:1rem;line-height:1.6;border:1px solid;}
+.alert-info{background:var(--blue-dim);border-color:rgba(68,136,255,0.3);color:#aabfff;}
+.alert-success{background:var(--green-dim);border-color:rgba(68,255,170,0.3);color:var(--green);}
+.alert-warn{background:var(--orange-dim);border-color:rgba(255,107,53,0.3);color:var(--orange);}
+.score-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.score-row:last-child{border-bottom:none;}
+.score-pts{font-family:var(--fd);font-size:1.4rem;color:var(--accent);}
+.duel-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.duel-hdr{background:var(--s2);padding:10px 1.2rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.duel-name{font-family:var(--fd);font-size:1rem;letter-spacing:1px;flex:1;}
+.vs-badge{font-size:0.62rem;color:var(--orange);font-weight:700;background:var(--orange-dim);padding:2px 8px;border-radius:4px;border:1px solid rgba(255,107,53,0.3);}
+.duel-body{padding:1rem 1.2rem;}
+.ex-label{font-size:0.65rem;color:var(--accent);font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.ex-side{display:flex;flex-direction:column;gap:4px;}
+.ex-team-name{font-size:0.63rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.winner-tag{font-size:0.6rem;font-weight:700;color:var(--green);}
+.rank-table{width:100%;border-collapse:collapse;}
+.rank-table th{font-size:0.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:7px 8px;border-bottom:1px solid var(--border);text-align:center;}
+.rank-table th:nth-child(2){text-align:left;}
+.rank-table td{padding:10px 8px;border-bottom:1px solid var(--border);font-size:0.83rem;text-align:center;color:var(--muted);}
+.rank-table td:nth-child(2){text-align:left;color:var(--text);}
+.rank-table tr:last-child td{border-bottom:none;}
+.rank-circle{width:25px;height:25px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:0.88rem;background:var(--s2);color:var(--muted);}
+.rank-circle.r1{background:var(--accent-dim);color:var(--accent);}
+.rank-circle.r2{background:rgba(180,180,180,0.1);color:#aaa;}
+.rank-circle.r3{background:rgba(205,127,50,0.12);color:#cd7f32;}
+.total-score{font-family:var(--fd);font-size:1.2rem;color:var(--text);}
+.podium{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.5rem;}
+.podium-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center;}
+.podium-card.p1{border-color:var(--accent-border);background:linear-gradient(135deg,rgba(232,255,71,0.06),transparent);}
+.podium-card.p2{border-color:rgba(180,180,180,0.2);}
+.podium-card.p3{border-color:rgba(205,127,50,0.25);}
+.podium-rank{font-family:var(--fd);font-size:2.8rem;line-height:1;}
+.p1 .podium-rank{color:var(--accent);}
+.p2 .podium-rank{color:#aaa;}
+.p3 .podium-rank{color:#cd7f32;}
+.podium-name{font-size:0.82rem;font-weight:600;margin:5px 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.podium-score{font-family:var(--fd);font-size:1.5rem;}
+.podium-pts{font-size:0.6rem;color:var(--muted);}
+.finale-group{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.finale-group-hdr{padding:10px 1.2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.finale-group-title{font-family:var(--fd);font-size:1rem;letter-spacing:1px;}
+.finale-athletes{padding:0.8rem 1.2rem;}
+.finale-athlete-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);}
+.finale-athlete-row:last-child{border-bottom:none;}
+.finale-athlete-name{font-size:0.88rem;font-weight:500;}
+.finale-athlete-team{font-size:0.62rem;color:var(--muted);}
+.btn-lache{font-size:0.68rem;padding:7px 13px;border-radius:var(--r-sm);font-weight:700;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s;}
+.btn-lache.active{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,68,85,0.3);}
+.btn-lache.done{background:var(--s3);color:var(--muted2);border:1px solid var(--border);cursor:default;}
+.rank-tag{font-family:var(--fd);font-size:1.2rem;color:var(--accent);min-width:28px;text-align:center;}
+.landing{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;}
+.landing-logo{font-family:var(--fd);font-size:3.8rem;color:var(--accent);letter-spacing:4px;line-height:1;margin-bottom:6px;}
+.landing-tagline{font-size:0.7rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:2.5rem;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:400px;margin-bottom:1.5rem;}
+.role-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:1.3rem 1rem;cursor:pointer;transition:all .2s;text-align:center;}
+.role-card:hover{border-color:var(--accent-border);background:var(--accent-dim);}
+.role-card:active{transform:scale(0.97);}
+.role-icon{font-size:1.6rem;margin-bottom:7px;}
+.role-title{font-family:var(--fd);font-size:1rem;letter-spacing:1px;margin-bottom:3px;}
+.role-desc{font-size:0.68rem;color:var(--muted);line-height:1.4;}
+.event-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.2rem;margin-bottom:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between;}
+.event-card:hover{border-color:var(--accent-border);}
+.event-name{font-size:0.95rem;font-weight:600;}
+.event-date{font-size:0.7rem;color:var(--muted);margin-top:2px;}
+.team-btn{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:0.9rem;cursor:pointer;transition:all .2s;text-align:center;font-size:0.85rem;font-weight:500;}
+.team-btn:hover{border-color:var(--accent-border);}
+.team-btn.selected{border-color:var(--accent);background:var(--accent-dim);}
+.athlete-btn{background:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm);padding:0.7rem 0.5rem;cursor:pointer;transition:all .2s;text-align:center;font-size:0.78rem;}
+.athlete-btn:hover{border-color:var(--accent-border);}
+.athlete-btn.selected{border-color:var(--accent);background:var(--accent-dim);}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:5px;animation:pulse 1s infinite;}
+.live-label{font-size:0.63rem;font-weight:600;color:var(--red);letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.pin-input{font-size:1.8rem;letter-spacing:8px;text-align:center;font-family:var(--fd);}
+.divider{border:none;border-top:1px solid var(--border);margin:1rem 0;}
+.flex{display:flex;}.items-center{align-items:center;}.justify-between{justify-content:space-between;}
+.gap-8{gap:8px;}.gap-12{gap:12px;}.mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-16{margin-top:16px;}.mt-24{margin-top:24px;}.mb-8{margin-bottom:8px;}.mb-12{margin-bottom:12px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.text-center{text-align:center;}.text-accent{color:var(--accent);}.text-green{color:var(--green);}.text-muted{color:var(--muted);}
+.hidden{display:none!important;}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);padding:11px 18px;font-size:0.8rem;font-weight:500;z-index:9999;transition:transform .3s ease;white-space:nowrap;pointer-events:none;max-width:90vw;text-align:center;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.toast-success{border-color:rgba(68,255,170,0.4);color:var(--green);}
+.toast.toast-error{border-color:rgba(255,68,85,0.4);color:var(--red);}
+.confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;}
+.confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall linear forwards;}
+@keyframes confettiFall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+@keyframes splitFlash{0%{background:rgba(232,255,71,0.25);transform:translateX(-8px);opacity:0;}40%{background:rgba(232,255,71,0.08);transform:translateX(0);opacity:1;}100%{background:transparent;}}
+.split-new{animation:splitFlash .6s ease forwards;border-radius:6px;padding:2px 4px;}
+@media(max-width:480px){.podium{grid-template-columns:1fr;}.role-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<div class="confetti-container" id="confetti"></div>
+
+<!-- LANDING -->
+<div id="screen-landing" class="screen active">
+  <div class="landing">
+    <div class="landing-logo">TRI ARENA</div>
+    <div class="landing-tagline">Team Fitness Challenge</div>
+    <div class="role-grid">
+      <div class="role-card" onclick="goRole('admin')"><div class="role-icon">⚙️</div><div class="role-title">Admin</div><div class="role-desc">Gérer l'événement</div></div>
+      <div class="role-card" onclick="goRole('capitaine')"><div class="role-icon">🎖️</div><div class="role-title">Capitaine</div><div class="role-desc">Gérer mon équipe</div></div>
+      <div class="role-card" onclick="goRole('athlete')"><div class="role-icon">💪</div><div class="role-title">Athlète</div><div class="role-desc">Entrer mes scores</div></div>
+      <div class="role-card" onclick="goRole('spectateur')"><div class="role-icon">👀</div><div class="role-title">Spectateur</div><div class="role-desc">Suivre en direct</div></div>
+    </div>
+    <div style="font-size:0.62rem;color:var(--muted2);">Créé par <span style="color:var(--muted);">Ilyes Assaiti</span></div>
+  </div>
+</div>
+
+<!-- PIN -->
+<div id="screen-pin" class="screen">
+  <div class="content" style="max-width:400px;padding-top:3rem;">
+    <div class="text-center mb-12"><div class="title-lg" id="pin-title">Code PIN</div><div class="desc text-center mt-8" id="pin-desc"></div></div>
+    <div class="card"><input type="password" class="pin-input" id="pin-input" placeholder="••••" maxlength="6" oninput="checkPin()"><div id="pin-error" class="alert alert-warn mt-12 hidden">Code incorrect ❌</div></div>
+    <button class="btn btn-ghost btn-full mt-12" onclick="showScreen('landing')">← Retour</button>
+  </div>
+</div>
+
+<!-- FIRST LAUNCH -->
+<div id="screen-firstlaunch" class="screen">
+  <div class="content" style="max-width:400px;padding-top:3rem;text-align:center;">
+    <div class="landing-logo" style="font-size:2.2rem;">TRI ARENA</div>
+    <div class="desc mt-8 mb-12" style="letter-spacing:2px;text-transform:uppercase;font-size:0.62rem;">Premier lancement</div>
+    <div class="card" style="text-align:left;">
+      <div class="card-title">Crée le PIN Admin</div>
+      <div class="desc mb-12">Ce code sera demandé à chaque connexion admin. Garde-le secret.</div>
+      <div class="label">PIN (4 à 6 chiffres)</div>
+      <input type="password" id="fl-pin1" placeholder="••••" maxlength="6" style="margin-bottom:10px;font-size:1.4rem;text-align:center;letter-spacing:6px;">
+      <div class="label">Confirme</div>
+      <input type="password" id="fl-pin2" placeholder="••••" maxlength="6" style="font-size:1.4rem;text-align:center;letter-spacing:6px;">
+      <div id="fl-error" class="alert alert-warn mt-12 hidden">PIN incorrect</div>
+    </div>
+    <button class="btn btn-primary btn-full btn-xl mt-16" onclick="createAdminPin()">Créer mon PIN →</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="screen-admin" class="screen">
+  <div class="hdr">
+    <div><div class="hdr-logo">TRI ARENA</div><div class="hdr-sub">Team Fitness Challenge</div></div>
+    <div class="hdr-right"><div class="hdr-role">Admin</div><div class="hdr-author">Ilyes Assaiti</div></div>
+  </div>
+  <div class="back-bar">
+    <button class="btn btn-ghost btn-sm" onclick="showScreen('landing')">← Accueil</button>
+    <span id="admin-event-label" style="font-size:0.72rem;color:var(--muted);"></span>
+  </div>
+  <!-- Events list -->
+  <div id="admin-events-screen" class="content">
+    <div class="title-xl mb-8">Événements</div>
+    <div class="desc mb-12">Crée ou reprends un événement existant.</div>
+    <div class="card">
+      <div class="card-title">Nouvel événement</div>
+      <div class="label">Nom</div>
+      <input type="text" id="new-event-name" placeholder="ex: Tournoi mai 2026" style="margin-bottom:8px;">
+      <div class="label">Date</div>
+      <input type="date" id="new-event-date" style="margin-bottom:12px;">
+      <button class="btn btn-primary btn-full" onclick="createEvent()">Créer →</button>
+    </div>
+    <div class="card mt-12">
+      <div class="card-title">Événements sauvegardés</div>
+      <div id="events-list"><div class="text-muted desc">Chargement...</div></div>
+    </div>
+  </div>
+  <!-- Event detail -->
+  <div id="admin-event-detail" class="hidden">
+    <nav class="nav">
+      <button class="nav-btn active" onclick="adminTab('setup')">⚙ Config</button>
+      <button class="nav-btn" onclick="adminTab('ep1')">① Relais</button>
+      <button class="nav-btn" onclick="adminTab('ep2')">② Force</button>
+      <button class="nav-btn" onclick="adminTab('ep3')">③ Run</button>
+      <button class="nav-btn" onclick="adminTab('finale')">★ Finale</button>
+      <button class="nav-btn" onclick="adminTab('classement')">🏆</button>
+    </nav>
+    <div class="content">
+      <div id="admin-setup" class="admin-tab">
+        <div class="title-xl mb-8">Configuration</div>
+        <div class="card">
+          <div class="card-title">Anti-triche épreuve 1</div>
+          <div class="label">Temps minimum avant validation arrivée (minutes)</div>
+          <input type="number" id="ep1-min-time" value="7" min="1" max="30" style="width:100px;">
+        </div>
+        <div class="card mt-12">
+          <div class="card-title">Équipes <span style="font-size:0.7rem;color:var(--muted);font-weight:400;">(PIN d'équipe pour les capitaines)</span></div>
+          <div id="setup-teams-list"></div>
+          <div class="flex gap-8 mt-12">
+            <button class="btn btn-ghost btn-sm" onclick="addTeam()">+ Équipe</button>
+            <button class="btn btn-danger btn-sm" onclick="removeTeam()">− Supprimer</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full btn-xl mt-16" onclick="saveConfig()">Enregistrer & lancer →</button>
+      </div>
+      <div id="admin-ep1" class="admin-tab hidden">
+        <div class="flex items-center justify-between mb-8"><div class="title-xl">① Relais</div><div id="ep1-status-badge"></div></div>
+        <div class="desc mb-8">Lance le chrono. Les capitaines signalent leur arrivée. Tu valides ou annules.</div>
+        <div class="card card-accent text-center">
+          <div class="chrono-label">Temps écoulé</div>
+          <div class="chrono" id="ep1-chrono">00:00</div>
+          <div class="flex gap-8 mt-12">
+            <button class="btn btn-success btn-full" id="ep1-start-btn" onclick="ep1Start()">▶ Lancer</button>
+            <button class="btn btn-ghost btn-full" onclick="ep1Reset()">↺ Reset</button>
+          </div>
+        </div>
+        <div class="card mt-12">
+          <div class="card-title">Arrivées <span id="ep1-min-display" style="font-size:0.68rem;color:var(--muted);font-family:var(--fb);font-weight:400;"></span></div>
+          <div id="ep1-arrivals"></div>
+          <button class="btn btn-danger btn-sm mt-12" onclick="ep1Undo()">↩ Annuler dernière arrivée</button>
+        </div>
+        <div class="card mt-12"><div class="card-title">Splits par équipe</div><div id="ep1-splits-admin"></div></div>
+        <button class="btn btn-primary btn-full mt-16" onclick="ep1Validate()">Valider épreuve →</button>
+      </div>
+      <div id="admin-ep2" class="admin-tab hidden">
+        <div class="flex items-center justify-between mb-8"><div class="title-xl">② Duels force</div><div id="ep2-status-badge"></div></div>
+        <div class="desc mb-8">Chaque équipe affronte 3 adversaires. Pompes & Squats : 1 min — Burpees : 30s.</div>
+        <div id="ep2-duels-list"></div>
+        <button class="btn btn-primary btn-full mt-12" onclick="ep2Validate()">Valider épreuve →</button>
+      </div>
+      <div id="admin-ep3" class="admin-tab hidden">
+        <div class="flex items-center justify-between mb-8"><div class="title-xl">③ Suicide run</div><div id="ep3-status-badge"></div></div>
+        <div class="desc mb-8">2 A/R + 5 squat jumps dans l'arène. Relais séquentiel. Les capitaines cliquent "terminé" pour chaque athlète.</div>
+        <div class="card card-accent text-center">
+          <div class="chrono-label">Chrono global</div>
+          <div class="chrono" id="ep3-chrono">00:00</div>
+          <div class="flex gap-8 mt-12">
+            <button class="btn btn-success btn-full" id="ep3-start-btn" onclick="ep3Start()">▶ Lancer</button>
+            <button class="btn btn-ghost btn-full" onclick="ep3Reset()">↺ Reset</button>
+          </div>
+        </div>
+        <div class="card mt-12"><div class="card-title">Progression</div><div id="ep3-progress"></div></div>
+        <button class="btn btn-primary btn-full mt-16" onclick="ep3Validate()">Valider épreuve →</button>
+      </div>
+      <div id="admin-finale" class="admin-tab hidden">
+        <div class="flex items-center justify-between mb-8"><div class="title-xl">★ Finale</div><div id="finale-status-badge"></div></div>
+        <div class="desc mb-8">3 groupes simultanés. Clique "A lâché" en temps réel.</div>
+        <div class="card card-accent text-center">
+          <div class="chrono-label">Chrono finale</div>
+          <div class="chrono" id="finale-chrono">00:00</div>
+          <div class="flex gap-8 mt-12">
+            <button class="btn btn-success btn-full" id="finale-start-btn" onclick="finaleStart()">▶ Lancer</button>
+            <button class="btn btn-ghost btn-full" onclick="finaleReset()">↺ Reset</button>
+          </div>
+        </div>
+        <div class="card mt-12 hidden" id="finale-handicap-card"><div class="card-title">Départs échelonnés</div><div id="finale-handicap-list"></div></div>
+        <div id="finale-groups" class="mt-12"></div>
+        <button class="btn btn-primary btn-full mt-16" onclick="finaleValidate()">Calculer classement →</button>
+      </div>
+      <div id="admin-classement" class="admin-tab hidden">
+        <div class="title-xl mb-12">🏆 Classement final</div>
+        <div id="podium-admin" class="podium"></div>
+        <div class="card"><table class="rank-table"><thead><tr><th>#</th><th>Équipe</th><th>Ep1</th><th>Ep2</th><th>Ep3</th><th>Fin</th><th>Total</th></tr></thead><tbody id="ranking-admin"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAPITAINE -->
+<div id="screen-capitaine" class="screen">
+  <div class="hdr">
+    <div><div class="hdr-logo">TRI ARENA</div><div class="hdr-sub">Team Fitness Challenge</div></div>
+    <div class="hdr-right"><div class="hdr-role">Capitaine</div><div class="hdr-author" id="cap-team-name">—</div></div>
+  </div>
+  <div class="back-bar"><button class="btn btn-ghost btn-sm" onclick="leaveRole()">← Accueil</button></div>
+  <div class="content">
+    <div id="cap-ep1-section" class="hidden">
+      <div class="title-xl mb-8">① Relais</div>
+      <div id="cap-ep1-order" class="card"></div>
+      <div class="card mt-12">
+        <div class="card-title">Splits — <span class="live-label" style="display:inline-flex;"><span class="live-dot"></span>LIVE</span></div>
+        <div id="cap-splits-list"></div>
+        <button class="btn btn-orange btn-full mt-12" onclick="capRecordSplit()">📍 Enregistrer un passage</button>
+      </div>
+    </div>
+    <div id="cap-ep2-section" class="hidden">
+      <div class="title-xl mb-8">② Duels</div>
+      <div class="desc mb-8">Assigne tes athlètes et entre les scores.</div>
+      <div id="cap-duels"></div>
+      <button class="btn btn-primary btn-full mt-12" onclick="capSaveAssignments()">Enregistrer →</button>
+    </div>
+    <div id="cap-ep3-section" class="hidden">
+      <div class="title-xl mb-8">③ Suicide run</div>
+      <div class="desc mb-8">Clique quand chaque athlète a terminé ses 2 A/R + 5 squat jumps dans l'arène.</div>
+      <div class="card card-accent text-center mb-12">
+        <div class="chrono-label">Chrono global</div>
+        <div class="chrono" id="cap-ep3-chrono">00:00</div>
+      </div>
+      <div id="cap-ep3-athletes"></div>
+    </div>
+    <div id="cap-finale-section" class="hidden">
+      <div class="title-xl mb-8">★ Finale</div>
+      <div class="desc mb-8">Assigne tes athlètes aux 3 positions.</div>
+      <div id="cap-finale-assign"></div>
+    </div>
+    <div id="cap-waiting">
+      <div class="card text-center" style="padding:3rem 1.2rem;">
+        <div style="font-size:2rem;margin-bottom:12px;">⏳</div>
+        <div class="title-md">En attente...</div>
+        <div class="desc text-center mt-8" id="cap-waiting-msg">L'admin va bientôt ouvrir la prochaine épreuve.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ATHLETE -->
+<div id="screen-athlete" class="screen">
+  <div class="hdr">
+    <div><div class="hdr-logo">TRI ARENA</div><div class="hdr-sub">Team Fitness Challenge</div></div>
+    <div class="hdr-right"><div class="hdr-role" id="athlete-role-label">Athlète</div><div class="hdr-author" id="athlete-name-display">—</div></div>
+  </div>
+  <div class="back-bar"><button class="btn btn-ghost btn-sm" onclick="leaveRole()">← Accueil</button></div>
+  <div class="content">
+    <div id="athlete-selector">
+      <div class="title-xl mb-12">Qui es-tu ?</div>
+      <div class="label">Ton équipe</div>
+      <div id="team-select-grid" class="grid-2 mt-8"></div>
+      <div id="athlete-name-section" class="hidden mt-16">
+        <div class="label">Ton nom</div>
+        <div id="athlete-select-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;"></div>
+      </div>
+      <button class="btn btn-primary btn-full btn-xl mt-16 hidden" id="confirm-identity-btn" onclick="confirmIdentity()">C'est moi ! →</button>
+    </div>
+    <div id="athlete-active" class="hidden">
+      <div id="athlete-ep1-view" class="hidden">
+        <div class="title-xl mb-8">① Relais</div>
+        <div class="card card-accent text-center">
+          <div class="chrono-label">Chrono live</div>
+          <div class="chrono" id="athlete-ep1-chrono">00:00</div>
+        </div>
+        <div class="alert alert-info mt-12">Attends le signal. Bonne course ! 🏃</div>
+        <div class="card mt-12"><div class="card-title">Splits live <span class="live-label" style="display:inline-flex;margin-left:6px;"><span class="live-dot"></span></span></div><div id="athlete-splits-live"></div></div>
+      </div>
+      <div id="athlete-ep2-view" class="hidden">
+        <div class="title-xl mb-8">② Duel</div>
+        <div id="athlete-ep2-content"></div>
+      </div>
+      <div id="athlete-ep3-view" class="hidden">
+        <div class="title-xl mb-8">③ Suicide run</div>
+        <div class="card card-accent text-center">
+          <div class="chrono-label">Chrono global</div>
+          <div class="chrono" id="athlete-ep3-chrono">00:00</div>
+        </div>
+        <div class="mt-12 text-center desc mb-8">Clique quand tu as fini tes 2 A/R + 5 squat jumps dans l'arène</div>
+        <button class="btn btn-success btn-full btn-xl" id="athlete-done-btn" onclick="athleteDoneEp3()">✓ J'ai terminé !</button>
+        <div id="athlete-ep3-done-msg" class="alert alert-success mt-12 hidden">Bien joué ! Temps enregistré ✓</div>
+      </div>
+      <div id="athlete-waiting" class="hidden">
+        <div class="card text-center" style="padding:3rem 1.2rem;">
+          <div style="font-size:2rem;margin-bottom:12px;">⏳</div>
+          <div class="title-md">En attente...</div>
+          <div class="desc text-center mt-8" id="athlete-waiting-msg">L'épreuve suivante arrive bientôt.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SPECTATEUR -->
+<div id="screen-spectateur" class="screen">
+  <div class="hdr">
+    <div><div class="hdr-logo">TRI ARENA</div><div class="hdr-sub">Team Fitness Challenge</div></div>
+    <div class="hdr-right"><div class="live-label"><span class="live-dot"></span>LIVE</div></div>
+  </div>
+  <div class="back-bar"><button class="btn btn-ghost btn-sm" onclick="leaveRole()">← Accueil</button></div>
+  <div class="content">
+    <div class="card card-accent mb-12"><div class="label">Épreuve en cours</div><div class="title-md" id="spec-epreuve-name">—</div></div>
+    <div class="card"><div class="card-title">Classement live</div><div id="spec-ranking"></div></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DB HELPERS — waits for Firebase SDK
+// ═══════════════════════════════════════
+function waitDb(fn) {
+  if (window._dbReady) { fn(); }
+  else { window.addEventListener('dbready', fn, { once: true }); }
+}
+
+function dbRef(path) { return window._ref(window._db, path); }
+function dbSet(path, val) { return window._set(dbRef(path), val); }
+function dbGet(path) { return window._get(dbRef(path)).then(s => s.val()); }
+function dbUpdate(path, val) { return window._update(dbRef(path), val); }
+function dbListen(path, cb) { return window._onValue(dbRef(path), s => cb(s.val())); }
+function dbRemove(path) { return window._remove(dbRef(path)); }
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let ROLE = null;         // admin | capitaine | athlete | spectateur
+let EVENT_ID = null;     // current event key
+let TEAM_IDX = null;     // capitaine/athlete team index
+let ATHLETE_IDX = null;  // athlete index within team
+
+let E = null;            // live event snapshot (from Firebase listener)
+let unsubListeners = []; // cleanup functions for onValue listeners
+
+// ═══════════════════════════════════════
+// CHEAT MESSAGES
+// ═══════════════════════════════════════
+const CHEAT_MSGS = [
+  "Frère t'as même pas chaud encore, laisse le chrono tourner 😭",
+  "Wallah t'es cap même pas on t'a vu depuis le début 👀",
+  "C'est quoi ce délire là, même Mbappé il sprinte pas aussi vite 💀",
+  "Ça sent la triche ici, on sait pas qui mais on sait 🫵",
+  "Bro t'as coupé par le parking là non 🅿️",
+  "Les gars regardez celui-là il veut valider à 3 minutes 💀💀",
+  "T'as oublié les 6 tours ou t'as fait que le couloir ? 😂",
+];
+const REP_MSGS = {
+  pompes: ["Wallah {v} pompes en 1 min ? Même Chris Bumstead il fait pas ça 💀","Bro {v} c'est pas sérieux là, t'as compté les demi-pompes ?","T'as les bras en caoutchouc ou t'as juste cliqué {v} fois ?"],
+  squats: ["{v} squats en 1 min ? Frère les genoux touchaient même pas le parallèle 💀","Wallah {v} ça compte pas si le dos ressemble à une virgule 😂","Bro {v} squats ? T'as fait des demi-genoux ou des vrais ?"],
+  burpees: ["{v} burpees en 30s ? Même les vidéos YouTube vont pas aussi vite 💀","Wallah {v} burpees frère, t'as skippé la partie sol ou quoi 😭","Bro {v} en 30s c'est de la fiction pure 🎬"],
+};
+function cheatRep(ex, v) {
+  const k = ex.toLowerCase().includes('pompe')?'pompes':ex.toLowerCase().includes('squat')?'squats':'burpees';
+  const lim = {pompes:80,squats:100,burpees:30};
+  if (v > lim[k]) toast(REP_MSGS[k][Math.floor(Math.random()*3)].replace('{v}',v), 'error');
+}
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function leaveRole() {
+  unsubListeners.forEach(u => u());
+  unsubListeners = [];
+  ROLE = TEAM_IDX = ATHLETE_IDX = EVENT_ID = null;
+  E = null;
+  showScreen('landing');
+}
+
+function goRole(role) {
+  ROLE = role;
+  if (role === 'spectateur') { showScreen('spectateur'); startSpecListener(); return; }
+  if (role === 'athlete') { showScreen('athlete'); loadAthleteSelector(); return; }
+  document.getElementById('pin-title').textContent = role === 'admin' ? 'Code Admin' : 'Code Capitaine';
+  document.getElementById('pin-desc').textContent = role === 'admin' ? 'Entre ton code admin' : 'Entre le code de ton équipe';
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').classList.add('hidden');
+  showScreen('pin');
+}
+
+async function checkPin() {
+  const val = document.getElementById('pin-input').value;
+  if (val.length < 4) return;
+  if (ROLE === 'admin') {
+    const storedPin = await dbGet('adminPin');
+    if (!storedPin) { createAdminPinFlow(); return; }
+    if (val === storedPin) { showScreen('admin'); loadAdminEvents(); return; }
+  }
+  if (ROLE === 'capitaine') {
+    // Find event first — use latest active event
+    const events = await dbGet('events');
+    if (!events) { toast('Aucun événement disponible', 'error'); return; }
+    let found = false;
+    for (const [eid, ev] of Object.entries(events)) {
+      if (!ev.teams) continue;
+      const idx = ev.teams.findIndex(t => t.pin === val);
+      if (idx !== -1) {
+        EVENT_ID = eid;
+        TEAM_IDX = idx;
+        document.getElementById('cap-team-name').textContent = ev.teams[idx].name;
+        showScreen('capitaine');
+        startCapListener();
+        found = true;
+        break;
+      }
+    }
+    if (!found) { document.getElementById('pin-error').classList.remove('hidden'); document.getElementById('pin-input').value = ''; }
+    return;
+  }
+  document.getElementById('pin-error').classList.remove('hidden');
+  document.getElementById('pin-input').value = '';
+}
+
+function createAdminPinFlow() {
+  showScreen('firstlaunch');
+}
+
+async function createAdminPin() {
+  const p1 = document.getElementById('fl-pin1').value;
+  const p2 = document.getElementById('fl-pin2').value;
+  const err = document.getElementById('fl-error');
+  if (p1.length < 4) { err.textContent = 'Au moins 4 chiffres'; err.classList.remove('hidden'); return; }
+  if (p1 !== p2) { err.textContent = 'Les PIN ne correspondent pas'; err.classList.remove('hidden'); return; }
+  const existing = await dbGet('adminPin');
+  if (existing) { toast('PIN déjà configuré, utilise-le.', 'error'); showScreen('landing'); return; }
+  await dbSet('adminPin', p1);
+  toast('PIN créé ✓', 'success');
+  showScreen('admin');
+  loadAdminEvents();
+}
+
+// ═══════════════════════════════════════
+// ADMIN — EVENTS
+// ═══════════════════════════════════════
+async function loadAdminEvents() {
+  document.getElementById('admin-events-screen').classList.remove('hidden');
+  document.getElementById('admin-event-detail').classList.add('hidden');
+  document.getElementById('admin-event-label').textContent = '';
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('new-event-date').value = today;
+
+  const listEl = document.getElementById('events-list');
+  listEl.innerHTML = '<div class="desc text-muted">Chargement...</div>';
+
+  const events = await dbGet('events');
+  if (!events || Object.keys(events).length === 0) {
+    listEl.innerHTML = '<div class="desc text-muted">Aucun événement. Crée-en un ci-dessus.</div>';
+    return;
+  }
+  listEl.innerHTML = '';
+  Object.entries(events).sort((a,b) => (b[1].date||'').localeCompare(a[1].date||'')).forEach(([eid, ev]) => {
+    const card = document.createElement('div');
+    card.className = 'event-card';
+    const statusMap = {setup:'⚙ Config',ep1:'① Relais',ep2:'② Force',ep3:'③ Run',finale:'★ Finale',done:'🏆 Terminé'};
+    card.innerHTML = `
+      <div>
+        <div class="event-name">${ev.name||'Sans nom'}</div>
+        <div class="event-date">${ev.date||''} · <span style="color:var(--accent)">${statusMap[ev.epreuve]||ev.epreuve||'setup'}</span></div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-primary btn-sm" onclick="openEvent('${eid}');event.stopPropagation()">Ouvrir</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEvent('${eid}');event.stopPropagation()">🗑</button>
+      </div>`;
+    listEl.appendChild(card);
+  });
+}
+
+async function createEvent() {
+  const name = document.getElementById('new-event-name').value.trim() || 'Événement';
+  const date = document.getElementById('new-event-date').value || new Date().toISOString().split('T')[0];
+  const eid = 'evt_' + Date.now();
+  const ev = {
+    name, date,
+    epreuve: 'setup',
+    config: { ep1MinSeconds: 420 },
+    teams: [
+      {name:'Équipe 1',athletes:['','',''],pin:'1111'},
+      {name:'Équipe 2',athletes:['','',''],pin:'2222'},
+      {name:'Équipe 3',athletes:['','',''],pin:'3333'},
+      {name:'Équipe 4',athletes:['','',''],pin:'4444'},
+    ],
+    ep1: { running:false, startTime:null, elapsed:0, arrivals:[], arrivalTimes:{}, splits:{}, orders:{}, pendingArrivals:{} },
+    ep2: { matchups:[], assignments:{}, scores:{} },
+    ep3: { running:false, startTime:null, elapsed:0, teamTimes:{}, athleteDone:{} },
+    finale: { running:false, startTime:null, elapsed:0, assignments:{}, ranks:{g:[],c:[],s:[]} },
+    scores: { ep1:{}, ep2:{}, ep3:{}, finale:{} }
+  };
+  await dbSet(`events/${eid}`, ev);
+  openEvent(eid);
+}
+
+async function deleteEvent(eid) {
+  if (!confirm('Supprimer cet événement ?')) return;
+  await dbRemove(`events/${eid}`);
+  loadAdminEvents();
+}
+
+function openEvent(eid) {
+  EVENT_ID = eid;
+  unsubListeners.forEach(u => u());
+  unsubListeners = [];
+  document.getElementById('admin-events-screen').classList.add('hidden');
+  document.getElementById('admin-event-detail').classList.remove('hidden');
+
+  const unsub = dbListen(`events/${eid}`, ev => {
+    if (!ev) return;
+    E = ev;
+    document.getElementById('admin-event-label').textContent = ev.name + ' · ' + (ev.date||'');
+    refreshAdminCurrentTab();
+    resumeChronosIfNeeded();
+  });
+  unsubListeners.push(unsub);
+  adminTab('setup');
+}
+
+// ═══════════════════════════════════════
+// CHRONO RESUME
+// ═══════════════════════════════════════
+let ep1LocalTimer=null, ep3LocalTimer=null, finaleLocalTimer=null;
+
+function resumeChronosIfNeeded() {
+  if (!E) return;
+  // EP1
+  if (E.ep1?.running && E.ep1?.startTime) {
+    if (!ep1LocalTimer) {
+      ep1LocalTimer = setInterval(() => {
+        const el = document.getElementById('ep1-chrono');
+        const ael = document.getElementById('athlete-ep1-chrono');
+        const cel = document.getElementById('cap-ep1-chrono-live');
+        const elapsed = Math.floor((Date.now() - E.ep1.startTime) / 1000);
+        if (el) el.textContent = fmt(elapsed);
+        if (ael) ael.textContent = fmt(elapsed);
+        if (cel) cel.textContent = fmt(elapsed);
+      }, 500);
+    }
+  } else {
+    clearInterval(ep1LocalTimer); ep1LocalTimer = null;
+    const el = document.getElementById('ep1-chrono');
+    if (el) el.textContent = fmt(E.ep1?.elapsed||0);
+  }
+  // EP3
+  if (E.ep3?.running && E.ep3?.startTime) {
+    if (!ep3LocalTimer) {
+      ep3LocalTimer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - E.ep3.startTime) / 1000);
+        ['ep3-chrono','athlete-ep3-chrono','cap-ep3-chrono'].forEach(id => {
+          const el = document.getElementById(id); if (el) el.textContent = fmt(elapsed);
+        });
+      }, 500);
+    }
+  } else {
+    clearInterval(ep3LocalTimer); ep3LocalTimer = null;
+    ['ep3-chrono','cap-ep3-chrono'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = fmt(E.ep3?.elapsed||0);
+    });
+  }
+  // FINALE
+  if (E.finale?.running && E.finale?.startTime) {
+    if (!finaleLocalTimer) {
+      finaleLocalTimer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - E.finale.startTime) / 1000);
+        const el = document.getElementById('finale-chrono'); if (el) el.textContent = fmt(elapsed);
+      }, 500);
+    }
+  } else {
+    clearInterval(finaleLocalTimer); finaleLocalTimer = null;
+    const el = document.getElementById('finale-chrono'); if (el) el.textContent = fmt(E.finale?.elapsed||0);
+  }
+}
+
+// ═══════════════════════════════════════
+// ADMIN TABS
+// ═══════════════════════════════════════
+let currentAdminTab = 'setup';
+function adminTab(tab) {
+  currentAdminTab = tab;
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
+  document.getElementById('admin-'+tab).classList.remove('hidden');
+  document.querySelectorAll('.nav-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['setup','ep1','ep2','ep3','finale','classement'][i] === tab);
+  });
+  refreshAdminCurrentTab();
+}
+
+function refreshAdminCurrentTab() {
+  if (!E) return;
+  if (currentAdminTab === 'setup') renderAdminSetup();
+  else if (currentAdminTab === 'ep1') renderAdminEp1();
+  else if (currentAdminTab === 'ep2') renderAdminEp2();
+  else if (currentAdminTab === 'ep3') renderAdminEp3();
+  else if (currentAdminTab === 'finale') renderAdminFinale();
+  else if (currentAdminTab === 'classement') renderClassement('admin');
+}
+
+function renderAdminSetup() {
+  if (!E) return;
+  const pinInput = document.getElementById('ep1-min-time');
+  if (pinInput) pinInput.value = Math.round((E.config?.ep1MinSeconds||420)/60);
+  const list = document.getElementById('setup-teams-list');
+  if (!list) return;
+  list.innerHTML = '';
+  (E.teams||[]).forEach((t, i) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:10px 0;border-bottom:1px solid var(--border);';
+    div.innerHTML = `
+      <div style="display:grid;grid-template-columns:26px 1fr 80px;gap:8px;align-items:center;margin-bottom:8px;">
+        <div class="rank-circle">${i+1}</div>
+        <input type="text" value="${t.name}" placeholder="Nom équipe" oninput="localTeamUpdate(${i},'name',this.value)">
+        <input type="text" value="${t.pin}" placeholder="PIN" maxlength="6" oninput="localTeamUpdate(${i},'pin',this.value)" style="text-align:center;">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding-left:34px;">
+        <input type="text" value="${t.athletes[0]||''}" placeholder="Athlète 1" oninput="localTeamUpdate(${i},'a0',this.value)" style="font-size:0.75rem;">
+        <input type="text" value="${t.athletes[1]||''}" placeholder="Athlète 2" oninput="localTeamUpdate(${i},'a1',this.value)" style="font-size:0.75rem;">
+        <input type="text" value="${t.athletes[2]||''}" placeholder="Athlète 3" oninput="localTeamUpdate(${i},'a2',this.value)" style="font-size:0.75rem;">
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+// Local buffer for setup edits before save
+let localTeams = null;
+function localTeamUpdate(i, field, val) {
+  if (!localTeams) localTeams = JSON.parse(JSON.stringify(E.teams));
+  if (field === 'name') localTeams[i].name = val;
+  else if (field === 'pin') localTeams[i].pin = val;
+  else if (field === 'a0') localTeams[i].athletes[0] = val;
+  else if (field === 'a1') localTeams[i].athletes[1] = val;
+  else if (field === 'a2') localTeams[i].athletes[2] = val;
+}
+
+function addTeam() {
+  if (!localTeams) localTeams = JSON.parse(JSON.stringify(E.teams||[]));
+  if (localTeams.length >= 10) return;
+  localTeams.push({name:'Équipe '+(localTeams.length+1),athletes:['','',''],pin:String(1000+Math.floor(Math.random()*9000))});
+  E = {...E, teams: localTeams};
+  renderAdminSetup();
+}
+
+function removeTeam() {
+  if (!localTeams) localTeams = JSON.parse(JSON.stringify(E.teams||[]));
+  if (localTeams.length <= 2) return;
+  localTeams.pop();
+  E = {...E, teams: localTeams};
+  renderAdminSetup();
+}
+
+async function saveConfig() {
+  const minSecs = (parseInt(document.getElementById('ep1-min-time').value)||7)*60;
+  const teams = localTeams || E.teams;
+  const matchups = genMatchups(teams.length);
+  await dbUpdate(`events/${EVENT_ID}`, {
+    teams,
+    epreuve: 'ep1',
+    'config/ep1MinSeconds': minSecs,
+    'ep2/matchups': matchups
+  });
+  localTeams = null;
+  toast('Configuration sauvegardée ✓', 'success');
+  adminTab('ep1');
+}
+
+function genMatchups(n) {
+  const m = [], seen = new Set();
+  for (let i = 0; i < n; i++) for (let d = 1; d <= 3; d++) {
+    const j = (i+d)%n, k = [Math.min(i,j),Math.max(i,j)].join('-');
+    if (!seen.has(k)) { seen.add(k); m.push([i,j]); }
+  }
+  return m;
+}
+
+// ═══════════════════════════════════════
+// EP1 — RELAIS
+// ═══════════════════════════════════════
+function renderAdminEp1() {
+  if (!E) return;
+  const minSecs = E.config?.ep1MinSeconds||420;
+  document.getElementById('ep1-status-badge').innerHTML = E.epreuve==='ep1'?'<span class="badge badge-green">Active</span>':'<span class="badge badge-muted">En attente</span>';
+  const el = document.getElementById('ep1-min-display');
+  if (el) el.textContent = `(bloqué avant ${Math.round(minSecs/60)} min)`;
+  // Start button state
+  const btn = document.getElementById('ep1-start-btn');
+  if (btn) { btn.textContent = E.ep1?.running ? '⏸ En cours...' : '▶ Lancer'; btn.disabled = !!E.ep1?.running; }
+  renderEp1Arrivals();
+  renderEp1SplitsAdmin();
+}
+
+function renderEp1Arrivals() {
+  const div = document.getElementById('ep1-arrivals');
+  if (!div || !E) return;
+  const arrived = E.ep1?.arrivals||[];
+  const pending = E.ep1?.pendingArrivals||{};
+  div.innerHTML = '';
+  (E.teams||[]).forEach((t, i) => {
+    const pos = arrived.indexOf(i);
+    const isPending = pending[i];
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    if (isPending && pos===-1) row.style.background = 'rgba(255,107,53,0.06)';
+    row.innerHTML = `
+      <div>
+        <div style="font-size:0.88rem;font-weight:500;">${t.name}</div>
+        ${pos!==-1?`<span class="badge badge-accent" style="margin-top:3px;">${pos+1}${pos===0?'er':'e'} — ${fmt(E.ep1?.arrivalTimes?.[i]||0)}</span>`:''}
+        ${isPending&&pos===-1?`<span class="badge badge-orange" style="margin-top:3px;">⏳ Capitaine signale l'arrivée</span>`:''}
+      </div>
+      <div style="display:flex;gap:5px;align-items:center;">
+        ${pos===-1&&isPending?`<button class="btn btn-success btn-sm" onclick="ep1Approve(${i})">✓</button><button class="btn btn-danger btn-sm" onclick="ep1Reject(${i})">✗</button>`:
+          pos===-1?`<button class="btn btn-orange btn-sm" onclick="ep1Arrive(${i})" ${E.ep1?.running?'':'disabled'}>🏁 Arrivée</button>`:
+          `<div class="score-pts">${pos+1}</div>`}
+      </div>`;
+    div.appendChild(row);
+  });
+}
+
+function renderEp1SplitsAdmin() {
+  const div = document.getElementById('ep1-splits-admin');
+  if (!div||!E) return;
+  div.innerHTML = '';
+  (E.teams||[]).forEach((t,i) => {
+    const splits = (E.ep1?.splits||{})[i]||[];
+    const order = (E.ep1?.orders||{})[i]||[];
+    if (!splits.length) return;
+    const block = document.createElement('div');
+    block.style.cssText = 'padding:8px 0;border-bottom:1px solid var(--border);';
+    block.innerHTML = `<div style="font-size:0.82rem;font-weight:500;margin-bottom:5px;">${t.name}</div>
+      ${splits.map((s,si)=>{const prev=si>0?splits[si-1]:0;const ai=order[Math.floor(si/2)];const name=t.athletes[ai]||'?';return `<div style="font-size:0.75rem;color:var(--muted);padding:2px 0;">Tour ${si+1} (${name}) — ${fmt(s)} <span style="color:var(--accent);">(+${fmt(s-prev)})</span></div>`;}).join('')}`;
+    div.appendChild(block);
+  });
+}
+
+async function ep1Start() {
+  const startTime = Date.now();
+  await dbUpdate(`events/${EVENT_ID}/ep1`, { running: true, startTime, elapsed: 0 });
+}
+
+async function ep1Reset() {
+  clearInterval(ep1LocalTimer); ep1LocalTimer = null;
+  await dbUpdate(`events/${EVENT_ID}/ep1`, { running:false, startTime:null, elapsed:0, arrivals:[], arrivalTimes:{}, splits:{}, orders:{}, pendingArrivals:{} });
+}
+
+async function ep1Arrive(ti) {
+  const minSecs = E.config?.ep1MinSeconds||420;
+  const elapsed = E.ep1?.startTime ? Math.floor((Date.now()-E.ep1.startTime)/1000) : (E.ep1?.elapsed||0);
+  if (elapsed < minSecs) { toast(CHEAT_MSGS[Math.floor(Math.random()*CHEAT_MSGS.length)], 'error'); return; }
+  const arrivals = [...(E.ep1?.arrivals||[])];
+  if (arrivals.includes(ti)) return;
+  arrivals.push(ti);
+  const times = {...(E.ep1?.arrivalTimes||{}), [ti]: elapsed};
+  await dbUpdate(`events/${EVENT_ID}/ep1`, { arrivals, arrivalTimes: times });
+}
+
+async function ep1Approve(ti) {
+  const arrivals = [...(E.ep1?.arrivals||[])];
+  if (!arrivals.includes(ti)) arrivals.push(ti);
+  const elapsed = E.ep1?.startTime ? Math.floor((Date.now()-E.ep1.startTime)/1000) : (E.ep1?.elapsed||0);
+  const times = {...(E.ep1?.arrivalTimes||{}), [ti]: elapsed};
+  const pending = {...(E.ep1?.pendingArrivals||{})};
+  delete pending[ti];
+  await dbUpdate(`events/${EVENT_ID}/ep1`, { arrivals, arrivalTimes: times, pendingArrivals: pending });
+  toast(E.teams[ti].name+' validé ✓', 'success');
+}
+
+async function ep1Reject(ti) {
+  const pending = {...(E.ep1?.pendingArrivals||{})};
+  delete pending[ti];
+  await dbUpdate(`events/${EVENT_ID}/ep1`, { pendingArrivals: pending });
+  toast('Arrivée annulée', 'error');
+}
+
+async function ep1Undo() {
+  const arrivals = [...(E.ep1?.arrivals||[])];
+  if (!arrivals.length) { toast('Rien à annuler', 'error'); return; }
+  const last = arrivals.pop();
+  const times = {...(E.ep1?.arrivalTimes||{})};
+  delete times[last];
+  await dbUpdate(`events/${EVENT_ID}/ep1`, { arrivals, arrivalTimes: times });
+  toast('Arrivée annulée pour '+E.teams[last].name, 'success');
+}
+
+async function ep1Validate() {
+  const n = E.teams.length;
+  const sc = {};
+  (E.ep1?.arrivals||[]).forEach((ti,pos) => { sc[ti] = n-pos; });
+  E.teams.forEach((_,i) => { if (!sc[i]) sc[i]=0; });
+  clearInterval(ep1LocalTimer); ep1LocalTimer = null;
+  await dbUpdate(`events/${EVENT_ID}`, { epreuve:'ep2', 'ep1/running':false, scores:{...E.scores, ep1:sc} });
+  toast('Épreuve 1 validée ✓', 'success');
+  adminTab('ep2');
+}
+
+// ═══════════════════════════════════════
+// EP2 — DUELS
+// ═══════════════════════════════════════
+function renderAdminEp2() {
+  if (!E) return;
+  document.getElementById('ep2-status-badge').innerHTML = E.epreuve==='ep2'?'<span class="badge badge-green">Active</span>':'<span class="badge badge-muted">En attente</span>';
+  const container = document.getElementById('ep2-duels-list');
+  container.innerHTML = '';
+  const exercises = ['Pompes','Squats','Burpees'];
+  const durations = [60, 60, 30];
+  (E.ep2?.matchups||[]).forEach(([i,j], mi) => {
+    const t1 = E.teams[i], t2 = E.teams[j];
+    const assigns = E.ep2?.assignments?.[mi]||{};
+    const scores = E.ep2?.scores?.[mi]||{};
+    const card = document.createElement('div');
+    card.className = 'duel-card';
+    let exRows = exercises.map((ex, ei) => {
+      const dur = durations[ei];
+      const tl = dur===60?'1 min':'30s';
+      const a0n = assigns[`${i}_${ei}`]!==undefined ? (t1.athletes[assigns[`${i}_${ei}`]]||'—') : '—';
+      const a1n = assigns[`${j}_${ei}`]!==undefined ? (t2.athletes[assigns[`${j}_${ei}`]]||'—') : '—';
+      const s0 = scores[`${ei}_0`], s1 = scores[`${ei}_1`];
+      const w = s0!==undefined&&s1!==undefined?(s0>s1?0:s1>s0?1:-1):null;
+      const initT = dur===60?'01:00':'00:30';
+      return `<div style="background:var(--s2);border-radius:8px;padding:10px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div><span class="ex-label">${ex}</span><span style="font-size:0.6rem;color:var(--muted);margin-left:6px;">${tl}</span></div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div class="chrono-sm" id="ec-${mi}-${ei}" style="font-size:1.1rem;color:var(--accent);">${initT}</div>
+            <button class="btn btn-success btn-sm" onclick="ep2StartChrono(${mi},${ei},${dur})">▶</button>
+            <button class="btn btn-ghost btn-sm" onclick="ep2ResetChrono(${mi},${ei},${dur})">↺</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 18px 1fr;gap:6px;align-items:start;">
+          <div class="ex-side"><div class="ex-team-name">${t1.name} — ${a0n}</div>
+            <input type="number" min="0" placeholder="reps" value="${s0||''}" oninput="adminSetEp2Score(${mi},${ei},0,this.value)" style="font-size:0.85rem;">
+            ${w===0?'<div class="winner-tag">✓ Gagne</div>':''}</div>
+          <div style="text-align:center;font-size:0.65rem;color:var(--muted2);padding-top:22px;">vs</div>
+          <div class="ex-side"><div class="ex-team-name">${t2.name} — ${a1n}</div>
+            <input type="number" min="0" placeholder="reps" value="${s1||''}" oninput="adminSetEp2Score(${mi},${ei},1,this.value)" style="font-size:0.85rem;">
+            ${w===1?'<div class="winner-tag">✓ Gagne</div>':''}</div>
+        </div>
+      </div>`;
+    }).join('');
+    card.innerHTML = `<div class="duel-hdr"><div class="duel-name">${t1.name}</div><div class="vs-badge">VS</div><div class="duel-name">${t2.name}</div></div><div class="duel-body">${exRows}</div>`;
+    container.appendChild(card);
+  });
+}
+
+let ep2Timers = {};
+function ep2StartChrono(mi, ei, dur) {
+  const key = `${mi}_${ei}`;
+  if (ep2Timers[key]) return;
+  let secs = dur;
+  const el = document.getElementById(`ec-${mi}-${ei}`);
+  ep2Timers[key] = setInterval(() => {
+    secs--;
+    const m=Math.floor(secs/60),s=secs%60;
+    if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (secs <= 0) {
+      clearInterval(ep2Timers[key]); ep2Timers[key]=null;
+      if (el) el.style.color='var(--red)';
+      toast(`⏰ ${['Pompes','Squats','Burpees'][ei]} terminé ! Duel ${mi+1}`, 'error');
+    }
+  }, 1000);
+}
+
+function ep2ResetChrono(mi, ei, dur) {
+  const key = `${mi}_${ei}`;
+  clearInterval(ep2Timers[key]); ep2Timers[key]=null;
+  const el = document.getElementById(`ec-${mi}-${ei}`);
+  if (el) { const m=Math.floor(dur/60),s=dur%60; el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; el.style.color='var(--accent)'; }
+}
+
+async function adminSetEp2Score(mi, ei, side, val) {
+  const v = parseInt(val)||0;
+  cheatRep(['pompes','squats','burpees'][ei], v);
+  await dbUpdate(`events/${EVENT_ID}/ep2/scores/${mi}`, { [`${ei}_${side}`]: v });
+}
+
+async function ep2Validate() {
+  const n = E.teams.length;
+  const sc = {};
+  E.teams.forEach((_,i) => sc[i]=0);
+  (E.ep2?.matchups||[]).forEach(([i,j],mi) => {
+    const s = E.ep2?.scores?.[mi]||{};
+    [0,1,2].forEach(ei => {
+      const r0=s[`${ei}_0`]||0, r1=s[`${ei}_1`]||0;
+      if (r0>r1) sc[i]=(sc[i]||0)+1;
+      else if (r1>r0) sc[j]=(sc[j]||0)+1;
+    });
+  });
+  await dbUpdate(`events/${EVENT_ID}`, { epreuve:'ep3', scores:{...E.scores, ep2:sc} });
+  toast('Épreuve 2 validée ✓', 'success');
+  adminTab('ep3');
+}
+
+// ═══════════════════════════════════════
+// EP3 — SUICIDE RUN
+// ═══════════════════════════════════════
+function renderAdminEp3() {
+  if (!E) return;
+  document.getElementById('ep3-status-badge').innerHTML = E.epreuve==='ep3'?'<span class="badge badge-green">Active</span>':'<span class="badge badge-muted">En attente</span>';
+  const btn = document.getElementById('ep3-start-btn');
+  if (btn) { btn.textContent = E.ep3?.running?'⏸ En cours...':'▶ Lancer'; btn.disabled=!!E.ep3?.running; }
+  const div = document.getElementById('ep3-progress');
+  if (!div) return;
+  div.innerHTML = '';
+  (E.teams||[]).forEach((t,i) => {
+    const done = E.ep3?.athleteDone?.[i]||{};
+    const cnt = Object.values(done).filter(Boolean).length;
+    const tt = E.ep3?.teamTimes?.[i];
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    row.innerHTML = `
+      <div>
+        <div style="font-size:0.88rem;font-weight:500;">${t.name}</div>
+        <div style="display:flex;gap:4px;margin-top:4px;">
+          ${[0,1,2].map(ai=>`<span class="badge ${done[ai]?'badge-green':'badge-muted'}">${t.athletes[ai]||'A'+(ai+1)}</span>`).join('')}
+        </div>
+      </div>
+      ${tt?`<div class="score-pts">${fmt(tt)}</div>`:`<div style="font-size:0.8rem;color:var(--muted);">${cnt}/3</div>`}`;
+    div.appendChild(row);
+  });
+}
+
+async function ep3Start() {
+  const startTime = Date.now();
+  await dbUpdate(`events/${EVENT_ID}/ep3`, { running:true, startTime, elapsed:0 });
+}
+
+async function ep3Reset() {
+  clearInterval(ep3LocalTimer); ep3LocalTimer=null;
+  await dbUpdate(`events/${EVENT_ID}/ep3`, { running:false, startTime:null, elapsed:0, teamTimes:{}, athleteDone:{} });
+}
+
+async function ep3Validate() {
+  const n = E.teams.length;
+  const times = E.teams.map((_,i) => E.ep3?.teamTimes?.[i]||99999);
+  const sorted = [...times].sort((a,b)=>a-b);
+  const sc = {};
+  times.forEach((t,i) => { sc[i] = E.ep3?.teamTimes?.[i] ? Math.max(0,n-sorted.indexOf(t)) : 0; });
+  clearInterval(ep3LocalTimer); ep3LocalTimer=null;
+  await dbUpdate(`events/${EVENT_ID}`, { epreuve:'finale', 'ep3/running':false, scores:{...E.scores, ep3:sc} });
+  toast('Épreuve 3 validée ✓', 'success');
+  adminTab('finale');
+}
+
+// ═══════════════════════════════════════
+// FINALE
+// ═══════════════════════════════════════
+function getInterScores() {
+  return (E.teams||[]).map((_,i) => (E.scores?.ep1?.[i]||0)+(E.scores?.ep2?.[i]||0)+(E.scores?.ep3?.[i]||0));
+}
+
+function renderAdminFinale() {
+  if (!E) return;
+  document.getElementById('finale-status-badge').innerHTML = E.epreuve==='finale'?'<span class="badge badge-green">Active</span>':'<span class="badge badge-muted">En attente</span>';
+  const btn = document.getElementById('finale-start-btn');
+  if (btn) { btn.textContent=E.finale?.running?'⏸ En cours...':'▶ Lancer'; btn.disabled=!!E.finale?.running; }
+
+  const inter = getInterScores();
+  const ranked = E.teams.map((t,i)=>({i,score:inter[i]})).sort((a,b)=>a.score-b.score);
+  const handicap = {};
+  ranked.forEach((r,rank) => { handicap[r.i]=rank*10; });
+
+  const hCard = document.getElementById('finale-handicap-card');
+  hCard.classList.remove('hidden');
+  const hList = document.getElementById('finale-handicap-list');
+  hList.innerHTML = '';
+  [...ranked].reverse().forEach(({i,score}) => {
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    row.innerHTML = `<div><div style="font-size:0.88rem;font-weight:500;">${E.teams[i].name}</div><div class="text-muted" style="font-size:0.72rem;">${score} pts</div></div><span class="badge badge-accent">+${handicap[i]}s</span>`;
+    hList.appendChild(row);
+  });
+
+  const groups = [{key:'g',label:'Gainage classique',color:'var(--blue)'},{key:'c',label:'Chaise',color:'var(--orange)'},{key:'s',label:'Superman',color:'var(--accent)'}];
+  const container = document.getElementById('finale-groups');
+  container.innerHTML = '';
+  groups.forEach(({key,label,color}) => {
+    const assigns = E.finale?.assignments?.[key]||{};
+    const ranks = E.finale?.ranks?.[key]||[];
+    const div = document.createElement('div');
+    div.className = 'finale-group';
+    const rows = (E.teams||[]).map((t,ti) => {
+      const ai = assigns[ti];
+      const name = typeof ai==='number'?(t.athletes[ai]||'Athlète '+(ai+1)):'Non assigné';
+      const rankPos = ranks.indexOf(ti);
+      const isDone = rankPos!==-1;
+      return `<div class="finale-athlete-row">
+        <div><div class="finale-athlete-name">${name}</div><div class="finale-athlete-team">${t.name} · +${handicap[ti]}s</div></div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          ${isDone?`<div class="rank-tag">${rankPos+1}</div>`:''}
+          <button class="btn-lache ${isDone?'done':'active'}" onclick="finaleOut('${key}',${ti})" ${isDone?'disabled':''}>${isDone?'✓ Lâché':'A lâché !'}</button>
+        </div>
+      </div>`;
+    }).join('');
+    div.innerHTML = `<div class="finale-group-hdr"><div class="finale-group-title" style="color:${color};">${label}</div><span class="badge badge-muted">${ranks.length}/${(E.teams||[]).length}</span></div><div class="finale-athletes">${rows}</div>`;
+    container.appendChild(div);
+  });
+}
+
+async function finaleOut(key, ti) {
+  const ranks = [...(E.finale?.ranks?.[key]||[])];
+  if (ranks.includes(ti)) return;
+  ranks.push(ti);
+  await dbUpdate(`events/${EVENT_ID}/finale/ranks`, { [key]: ranks });
+  toast(E.teams[ti].name+' a lâché !', 'error');
+}
+
+async function finaleStart() {
+  const startTime = Date.now();
+  await dbUpdate(`events/${EVENT_ID}/finale`, { running:true, startTime, elapsed:0 });
+}
+
+async function finaleReset() {
+  clearInterval(finaleLocalTimer); finaleLocalTimer=null;
+  await dbUpdate(`events/${EVENT_ID}/finale`, { running:false, startTime:null, elapsed:0, ranks:{g:[],c:[],s:[]} });
+}
+
+async function finaleValidate() {
+  const n = E.teams.length;
+  const sc = {};
+  E.teams.forEach((_,i) => sc[i]=0);
+  ['g','c','s'].forEach(key => {
+    (E.finale?.ranks?.[key]||[]).forEach((ti,pos) => { sc[ti]=(sc[ti]||0)+(pos+1); });
+  });
+  clearInterval(finaleLocalTimer); finaleLocalTimer=null;
+  await dbUpdate(`events/${EVENT_ID}`, { epreuve:'done', 'finale/running':false, scores:{...E.scores, finale:sc} });
+  toast('Classement calculé ! 🏆', 'success');
+  launchConfetti();
+  adminTab('classement');
+}
+
+// ═══════════════════════════════════════
+// CLASSEMENT
+// ═══════════════════════════════════════
+function renderClassement(view) {
+  if (!E) return;
+  const totals = (E.teams||[]).map((t,i) => ({
+    name:t.name,
+    ep1:E.scores?.ep1?.[i]||0,
+    ep2:E.scores?.ep2?.[i]||0,
+    ep3:E.scores?.ep3?.[i]||0,
+    finale:E.scores?.finale?.[i]||0,
+    total:(E.scores?.ep1?.[i]||0)+(E.scores?.ep2?.[i]||0)+(E.scores?.ep3?.[i]||0)+(E.scores?.finale?.[i]||0)
+  })).sort((a,b)=>b.total-a.total);
+
+  const pid = view==='admin'?'podium-admin':'podium-spec';
+  const rid = view==='admin'?'ranking-admin':'ranking-spec';
+
+  if (document.getElementById(pid)) {
+    const pod = document.getElementById(pid);
+    pod.innerHTML = '';
+    ['p1','p2','p3'].forEach((cls,i) => {
+      if (!totals[i]) return;
+      const c = document.createElement('div');
+      c.className = `podium-card ${cls}`;
+      c.innerHTML = `<div class="podium-rank">${i+1}</div><div class="podium-name">${totals[i].name}</div><div class="podium-score">${totals[i].total}</div><div class="podium-pts">pts</div>`;
+      pod.appendChild(c);
+    });
+  }
+  if (document.getElementById(rid)) {
+    document.getElementById(rid).innerHTML = totals.map((r,idx) => {
+      const rc=idx===0?'r1':idx===1?'r2':idx===2?'r3':'';
+      return `<tr><td><span class="rank-circle ${rc}">${idx+1}</span></td><td><strong>${r.name}</strong></td><td>${r.ep1}</td><td>${r.ep2}</td><td>${r.ep3}</td><td>${r.finale||'—'}</td><td><span class="total-score">${r.total}</span></td></tr>`;
+    }).join('');
+  }
+}
+
+// ═══════════════════════════════════════
+// CAPITAINE
+// ═══════════════════════════════════════
+function startCapListener() {
+  sessionStorage.setItem('cap_event', EVENT_ID);
+  sessionStorage.setItem('cap_team', TEAM_IDX);
+  const unsub = dbListen(`events/${EVENT_ID}`, ev => {
+    if (!ev) return;
+    E = ev;
+    updateCapView();
+    resumeChronosIfNeeded();
+  });
+  unsubListeners.push(unsub);
+}
+
+function updateCapView() {
+  if (!E) return;
+  ['ep1','ep2','ep3','finale'].forEach(s => {
+    const el = document.getElementById('cap-'+s+'-section');
+    if (el) el.classList.add('hidden');
+  });
+  document.getElementById('cap-waiting').classList.add('hidden');
+  if (E.epreuve==='ep1') { document.getElementById('cap-ep1-section').classList.remove('hidden'); renderCapEp1(); }
+  else if (E.epreuve==='ep2') { document.getElementById('cap-ep2-section').classList.remove('hidden'); renderCapDuels(); }
+  else if (E.epreuve==='ep3') { document.getElementById('cap-ep3-section').classList.remove('hidden'); renderCapEp3(); }
+  else if (E.epreuve==='finale') { document.getElementById('cap-finale-section').classList.remove('hidden'); renderCapFinale(); }
+  else {
+    document.getElementById('cap-waiting').classList.remove('hidden');
+    document.getElementById('cap-waiting-msg').textContent = E.epreuve==='done'?'Événement terminé ! 🏆':'L\'admin va bientôt ouvrir la prochaine épreuve.';
+  }
+}
+
+function renderCapEp1() {
+  const ti = TEAM_IDX, t = E.teams[ti];
+  const order = E.ep1?.orders?.[ti]||[0,1,2];
+  const arrived = E.ep1?.arrivals||[];
+  const pending = E.ep1?.pendingArrivals||{};
+  const alreadyArrived = arrived.includes(ti);
+  const isPending = pending[ti];
+  const orderDiv = document.getElementById('cap-ep1-order');
+  if (!orderDiv) return;
+  orderDiv.innerHTML = `<div class="card-title">Ordre de passage</div>
+    ${[0,1,2].map(slot=>`<div style="display:grid;grid-template-columns:60px 1fr;gap:8px;align-items:center;margin-bottom:8px;">
+      <div style="font-size:0.68rem;color:var(--muted);text-align:center;">Passage ${slot+1}</div>
+      <select onchange="capSetOrder(${ti},${slot},parseInt(this.value))" style="font-size:0.82rem;padding:7px;">
+        ${t.athletes.map((a,ai)=>`<option value="${ai}" ${order[slot]===ai?'selected':''}>${a||'Athlète '+(ai+1)}</option>`).join('')}
+      </select></div>`).join('')}
+    <hr style="border-color:var(--border);margin:10px 0;">
+    ${alreadyArrived?`<div class="alert alert-success">✓ Arrivée confirmée</div>`:
+      isPending?`<div class="alert alert-warn">⏳ Arrivée signalée — en attente admin...</div>`:
+      `<button class="btn btn-orange btn-full mt-8" onclick="capSignalArrival(${ti})" ${E.ep1?.running?'':'disabled'}>🏁 Signaler notre arrivée</button>`}`;
+  const splits = E.ep1?.splits?.[ti]||[];
+  const sl = document.getElementById('cap-splits-list');
+  if (sl) sl.innerHTML = splits.length===0?'<div class="desc text-muted">Aucun passage enregistré.</div>':
+    splits.map((s,si)=>{const prev=si>0?splits[si-1]:0;const ai=order[Math.floor(si/2)];const name=t.athletes[ai]||'A'+(ai+1);
+      return `<div class="score-row"><div style="font-size:0.82rem;">Tour ${si+1} — ${name}</div>
+        <div style="display:flex;align-items:center;gap:7px;"><span class="score-pts" style="font-size:1rem;">${fmt(s)}</span>
+        <button class="btn btn-danger btn-sm" onclick="capUndoSplit(${ti})">↩</button></div></div>`;}).join('');
+}
+
+async function capSetOrder(ti, slot, ai) {
+  const orders = JSON.parse(JSON.stringify(E.ep1?.orders||{}));
+  if (!orders[ti]) orders[ti]=[0,1,2];
+  orders[ti][slot]=ai;
+  await dbUpdate(`events/${EVENT_ID}/ep1`, {orders});
+}
+
+async function capRecordSplit() {
+  if (!E.ep1?.running) { toast('Le chrono n\'est pas lancé !','error'); return; }
+  const ti=TEAM_IDX;
+  const splits=JSON.parse(JSON.stringify(E.ep1?.splits||{}));
+  if (!splits[ti]) splits[ti]=[];
+  if (splits[ti].length>=6) { toast('Les 6 tours sont déjà enregistrés !','error'); return; }
+  const elapsed=Math.floor((Date.now()-E.ep1.startTime)/1000);
+  splits[ti].push(elapsed);
+  await dbUpdate(`events/${EVENT_ID}/ep1`,{splits});
+  toast('Tour '+(splits[ti].length)+' — '+fmt(elapsed),'success');
+}
+
+async function capUndoSplit(ti) {
+  const splits=JSON.parse(JSON.stringify(E.ep1?.splits||{}));
+  if (!splits[ti]?.length) return;
+  splits[ti].pop();
+  await dbUpdate(`events/${EVENT_ID}/ep1`,{splits});
+  toast('Dernier split annulé','success');
+}
+
+async function capSignalArrival(ti) {
+  const minSecs=E.config?.ep1MinSeconds||420;
+  const elapsed=E.ep1?.startTime?Math.floor((Date.now()-E.ep1.startTime)/1000):(E.ep1?.elapsed||0);
+  if (elapsed<minSecs) { toast(CHEAT_MSGS[Math.floor(Math.random()*CHEAT_MSGS.length)],'error'); return; }
+  const pending={...(E.ep1?.pendingArrivals||{}),[ti]:true};
+  await dbUpdate(`events/${EVENT_ID}/ep1`,{pendingArrivals:pending});
+  toast('Arrivée signalée ! L\'admin va valider 🏁','success');
+}
+
+function renderCapDuels() {
+  const ti=TEAM_IDX, container=document.getElementById('cap-duels');
+  if (!container) return;
+  container.innerHTML='';
+  const exercises=['Pompes','Squats','Burpees 30s'], durations=[60,60,30];
+  (E.ep2?.matchups||[]).forEach(([i,j],mi) => {
+    if (i!==ti&&j!==ti) return;
+    const isLeft=i===ti, opp=E.teams[isLeft?j:i], t=E.teams[ti];
+    const assigns=E.ep2?.assignments?.[mi]||{}, scores=E.ep2?.scores?.[mi]||{};
+    const card=document.createElement('div'); card.className='card'; card.style.marginBottom='10px';
+    let rows=exercises.map((ex,ei)=>{
+      const tl=durations[ei]===60?'1 min':'30s', assignKey=`${ti}_${ei}`, cur=assigns[assignKey];
+      const myScore=scores[`${ei}_${isLeft?0:1}`];
+      return `<div style="margin-bottom:12px;"><div class="label">${ex} <span style="font-size:0.6rem;font-weight:400;">(${tl})</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px;">
+          ${t.athletes.map((a,ai)=>`<button class="athlete-btn ${cur===ai?'selected':''}" onclick="capAssign(${mi},'${assignKey}',${ai})">${a||'A'+(ai+1)}</button>`).join('')}
+        </div>
+        <input type="number" min="0" placeholder="Score reps" value="${myScore||''}" oninput="capSetEp2Score(${mi},${ei},${isLeft?0:1},this.value)" style="font-size:0.85rem;"></div>`;
+    }).join('');
+    card.innerHTML=`<div class="card-title">vs ${opp.name}</div>${rows}`;
+    container.appendChild(card);
+  });
+}
+
+async function capAssign(mi,key,ai) { await dbUpdate(`events/${EVENT_ID}/ep2/assignments/${mi}`,{[key]:ai}); }
+async function capSetEp2Score(mi,ei,side,val) {
+  const v=parseInt(val)||0; cheatRep(['pompes','squats','burpees'][ei],v);
+  await dbUpdate(`events/${EVENT_ID}/ep2/scores/${mi}`,{[`${ei}_${side}`]:v});
+}
+async function capSaveAssignments() { toast('Enregistré ✓','success'); }
+
+function renderCapEp3() {
+  const ti=TEAM_IDX, t=E.teams[ti], div=document.getElementById('cap-ep3-athletes');
+  if (!div) return; div.innerHTML='';
+  t.athletes.forEach((a,ai)=>{
+    const done=E.ep3?.athleteDone?.[ti]?.[ai];
+    const row=document.createElement('div'); row.className='score-row';
+    row.innerHTML=`<div><div style="font-size:0.88rem;font-weight:500;">${a||'Athlète '+(ai+1)}</div>${done?'<span class="badge badge-green">Terminé ✓</span>':'<span class="badge badge-muted">En course</span>'}</div>${!done?`<button class="btn btn-success btn-sm" onclick="capMarkDoneEp3(${ti},${ai})">✓ Terminé</button>`:''}`;
+    div.appendChild(row);
+  });
+}
+
+async function capMarkDoneEp3(ti,ai) {
+  await dbUpdate(`events/${EVENT_ID}/ep3/athleteDone/${ti}`,{[ai]:true});
+  const done={...(E.ep3?.athleteDone?.[ti]||{}),[ai]:true};
+  if (Object.values(done).filter(Boolean).length===3&&!E.ep3?.teamTimes?.[ti]) {
+    const elapsed=E.ep3?.startTime?Math.floor((Date.now()-E.ep3.startTime)/1000):(E.ep3?.elapsed||0);
+    await dbUpdate(`events/${EVENT_ID}/ep3/teamTimes`,{[ti]:elapsed});
+    toast(E.teams[ti].name+' terminé ! '+fmt(elapsed),'success');
+  }
+}
+
+function renderCapFinale() {
+  const ti=TEAM_IDX,t=E.teams[ti],div=document.getElementById('cap-finale-assign');
+  if (!div) return;
+  const positions=[{key:'g',label:'Gainage classique'},{key:'c',label:'Chaise'},{key:'s',label:'Superman'}];
+  div.innerHTML=positions.map(({key,label})=>{
+    const cur=E.finale?.assignments?.[key]?.[ti];
+    return `<div class="card mb-8"><div class="card-title">${label}</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+      ${t.athletes.map((a,ai)=>`<button class="athlete-btn ${cur===ai?'selected':''}" onclick="capAssignFinale('${key}',${ti},${ai})">${a||'A'+(ai+1)}</button>`).join('')}
+    </div></div>`;}).join('');
+}
+
+async function capAssignFinale(key,ti,ai) {
+  await dbUpdate(`events/${EVENT_ID}/finale/assignments/${key}`,{[ti]:ai});
+  toast('Position assignée ✓','success');
+}
+
+// ═══════════════════════════════════════
+// ATHLETE
+// ═══════════════════════════════════════
+async function loadAthleteSelector() {
+  const savedEvent=sessionStorage.getItem('ath_event');
+  const savedTeam=sessionStorage.getItem('ath_team');
+  const savedAthlete=sessionStorage.getItem('ath_athlete');
+  const events=await dbGet('events');
+  let activeEvent=null;
+  if (events) {
+    const entries=Object.entries(events).filter(([,ev])=>ev.epreuve&&ev.epreuve!=='done');
+    if (entries.length>0) activeEvent=entries.sort((a,b)=>(b[1].date||'').localeCompare(a[1].date||''))[0];
+  }
+  if (savedEvent&&savedTeam!==null&&savedAthlete!==null&&activeEvent&&activeEvent[0]===savedEvent) {
+    EVENT_ID=savedEvent; TEAM_IDX=parseInt(savedTeam); ATHLETE_IDX=parseInt(savedAthlete);
+    const ev=activeEvent[1];
+    document.getElementById('athlete-name-display').textContent=ev.teams[TEAM_IDX]?.athletes[ATHLETE_IDX]||'Athlète';
+    document.getElementById('athlete-role-label').textContent=ev.teams[TEAM_IDX]?.name||'';
+    document.getElementById('athlete-selector').classList.add('hidden');
+    document.getElementById('athlete-active').classList.remove('hidden');
+    startAthleteListener(); return;
+  }
+  if (!activeEvent) { document.getElementById('team-select-grid').innerHTML='<div class="desc text-muted">Aucun événement en cours.</div>'; return; }
+  EVENT_ID=activeEvent[0]; E=activeEvent[1];
+  const grid=document.getElementById('team-select-grid'); grid.innerHTML='';
+  E.teams.forEach((t,i)=>{
+    const btn=document.createElement('div'); btn.className='team-btn'; btn.textContent=t.name;
+    btn.onclick=()=>selectTeam(i,E); grid.appendChild(btn);
+  });
+}
+
+let selTeam=null,selAthlete=null;
+function selectTeam(i,ev) {
+  selTeam=i;
+  document.querySelectorAll('.team-btn').forEach((b,idx)=>b.classList.toggle('selected',idx===i));
+  const sec=document.getElementById('athlete-name-section'); sec.classList.remove('hidden');
+  const grid=document.getElementById('athlete-select-grid'); grid.innerHTML='';
+  const t=ev?ev.teams[i]:E.teams[i];
+  (t.athletes||[]).forEach((a,ai)=>{
+    const btn=document.createElement('div'); btn.className='athlete-btn'; btn.textContent=a||'Athlète '+(ai+1);
+    btn.onclick=()=>{selAthlete=ai;document.querySelectorAll('.athlete-btn').forEach((b,idx)=>b.classList.toggle('selected',idx===ai));document.getElementById('confirm-identity-btn').classList.remove('hidden');};
+    grid.appendChild(btn);
+  });
+  selAthlete=null; document.getElementById('confirm-identity-btn').classList.add('hidden');
+}
+
+function confirmIdentity() {
+  TEAM_IDX=selTeam; ATHLETE_IDX=selAthlete;
+  const t=E.teams[TEAM_IDX];
+  document.getElementById('athlete-name-display').textContent=t.athletes[ATHLETE_IDX]||'Athlète '+(ATHLETE_IDX+1);
+  document.getElementById('athlete-role-label').textContent=t.name;
+  sessionStorage.setItem('ath_event',EVENT_ID);
+  sessionStorage.setItem('ath_team',TEAM_IDX);
+  sessionStorage.setItem('ath_athlete',ATHLETE_IDX);
+  document.getElementById('athlete-selector').classList.add('hidden');
+  document.getElementById('athlete-active').classList.remove('hidden');
+  startAthleteListener();
+}
+
+let prevSplitCounts={};
+function startAthleteListener() {
+  const unsub=dbListen(`events/${EVENT_ID}`,ev=>{if(!ev)return;E=ev;updateAthleteView();resumeChronosIfNeeded();});
+  unsubListeners.push(unsub);
+}
+
+function updateAthleteView() {
+  if (!E) return;
+  ['ep1','ep2','ep3','waiting'].forEach(v=>document.getElementById('athlete-'+v+'-view').classList.add('hidden'));
+  if (E.epreuve==='ep1') { document.getElementById('athlete-ep1-view').classList.remove('hidden'); renderSplitsLive(); }
+  else if (E.epreuve==='ep2') { document.getElementById('athlete-ep2-view').classList.remove('hidden'); renderAthleteEp2(); }
+  else if (E.epreuve==='ep3') {
+    document.getElementById('athlete-ep3-view').classList.remove('hidden');
+    const done=E.ep3?.athleteDone?.[TEAM_IDX]?.[ATHLETE_IDX];
+    if (done) { const btn=document.getElementById('athlete-done-btn'); if(btn){btn.disabled=true;btn.textContent='✓ Enregistré !';} document.getElementById('athlete-ep3-done-msg').classList.remove('hidden'); }
+  } else {
+    document.getElementById('athlete-waiting').classList.remove('hidden');
+    const msgs={setup:'L\'événement commence bientôt !',finale:'Finale en cours — suivez le tableau de bord !',done:'Événement terminé ! Merci 🏆'};
+    document.getElementById('athlete-waiting-msg').textContent=msgs[E.epreuve]||'En attente...';
+  }
+}
+
+function renderSplitsLive() {
+  const div=document.getElementById('athlete-splits-live');
+  if (!div||!E) return;
+  const splits=E.ep1?.splits||{};
+  let html='',hasData=false;
+  (E.teams||[]).forEach((t,ti)=>{
+    const ts=splits[ti]||[]; if (!ts.length) return;
+    hasData=true;
+    const last=ts[ts.length-1];
+    const isNew=ts.length>(prevSplitCounts[ti]||0);
+    prevSplitCounts[ti]=ts.length;
+    html+=`<div class="score-row ${isNew?'split-new':''}">
+      <div><div style="font-size:0.88rem;font-weight:500;">${t.name}</div><div style="font-size:0.68rem;color:var(--muted);">Tour ${ts.length}/6</div></div>
+      <div style="text-align:right;"><div class="score-pts" style="font-size:1rem;">${fmt(last)}</div>${ts.length>1?`<div style="font-size:0.62rem;color:var(--muted);">+${fmt(last-(ts[ts.length-2]||0))}</div>`:''}</div>
+    </div>`;
+  });
+  div.innerHTML=hasData?html:'<div class="desc text-muted">En attente des premiers passages...</div>';
+}
+
+function renderAthleteEp2() {
+  const ti=TEAM_IDX,ai=ATHLETE_IDX,content=document.getElementById('athlete-ep2-content');
+  if (!content) return; content.innerHTML='';
+  let found=false;
+  (E.ep2?.matchups||[]).forEach(([i,j],mi)=>{
+    if (i!==ti&&j!==ti) return;
+    const isLeft=i===ti,assigns=E.ep2?.assignments?.[mi]||{};
+    let myEx=null,myExIdx=-1;
+    [0,1,2].forEach(ei=>{if(assigns[`${ti}_${ei}`]===ai){myEx=['Pompes','Squats','Burpees 30s'][ei];myExIdx=ei;}});
+    if (!myEx) return; found=true;
+    const opp=E.teams[isLeft?j:i];
+    const myScore=E.ep2?.scores?.[mi]?.[`${myExIdx}_${isLeft?0:1}`]||'';
+    const div=document.createElement('div'); div.className='card card-accent mb-12';
+    div.innerHTML=`<div class="label">vs ${opp.name}</div><div class="title-lg text-accent" style="margin:6px 0;">${myEx}</div>
+      <div class="desc mb-8">${myExIdx<2?'Max en 1 minute !':'Max en 30 secondes !'}</div>
+      <input type="number" min="0" placeholder="0" value="${myScore}" oninput="athleteSetEp2Score(${mi},${myExIdx},${isLeft?0:1},this.value)" style="font-size:1.3rem;text-align:center;padding:12px;">`;
+    content.appendChild(div);
+  });
+  if (!found) content.innerHTML='<div class="alert alert-info">Le capitaine n\'a pas encore assigné ton exercice.</div>';
+}
+
+async function athleteSetEp2Score(mi,ei,side,val) {
+  const v=parseInt(val)||0; cheatRep(['pompes','squats','burpees'][ei],v);
+  await dbUpdate(`events/${EVENT_ID}/ep2/scores/${mi}`,{[`${ei}_${side}`]:v});
+}
+
+async function athleteDoneEp3() {
+  const ti=TEAM_IDX,ai=ATHLETE_IDX;
+  await dbUpdate(`events/${EVENT_ID}/ep3/athleteDone/${ti}`,{[ai]:true});
+  const done={...(E.ep3?.athleteDone?.[ti]||{}),[ai]:true};
+  if (Object.values(done).filter(Boolean).length===3&&!E.ep3?.teamTimes?.[ti]) {
+    const elapsed=E.ep3?.startTime?Math.floor((Date.now()-E.ep3.startTime)/1000):(E.ep3?.elapsed||0);
+    await dbUpdate(`events/${EVENT_ID}/ep3/teamTimes`,{[ti]:elapsed});
+    toast(E.teams[ti].name+' terminé ! '+fmt(elapsed),'success');
+  }
+  document.getElementById('athlete-done-btn').disabled=true;
+  document.getElementById('athlete-done-btn').textContent='✓ Enregistré !';
+  document.getElementById('athlete-ep3-done-msg').classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════
+// SPECTATEUR
+// ═══════════════════════════════════════
+async function startSpecListener() {
+  const events=await dbGet('events');
+  if (!events) { document.getElementById('spec-epreuve-name').textContent='Aucun événement'; return; }
+  const entries=Object.entries(events).sort((a,b)=>(b[1].date||'').localeCompare(a[1].date||''));
+  if (!entries.length) return;
+  EVENT_ID=entries[0][0];
+  const unsub=dbListen(`events/${EVENT_ID}`,ev=>{if(!ev)return;E=ev;renderSpec();});
+  unsubListeners.push(unsub);
+}
+
+function renderSpec() {
+  if (!E) return;
+  const names={setup:'⚙ Configuration',ep1:'① Relais 400m',ep2:'② Duels force',ep3:'③ Suicide run',finale:'★ Finale Last Standing',done:'🏆 Événement terminé'};
+  document.getElementById('spec-epreuve-name').textContent=names[E.epreuve]||E.epreuve;
+  const totals=(E.teams||[]).map((t,i)=>({name:t.name,total:(E.scores?.ep1?.[i]||0)+(E.scores?.ep2?.[i]||0)+(E.scores?.ep3?.[i]||0)+(E.scores?.finale?.[i]||0)})).sort((a,b)=>b.total-a.total);
+  document.getElementById('spec-ranking').innerHTML=totals.map((t,idx)=>{
+    const rc=idx===0?'r1':idx===1?'r2':idx===2?'r3':'';
+    return `<div class="score-row"><div style="display:flex;align-items:center;gap:9px;"><span class="rank-circle ${rc}">${idx+1}</span><span style="font-size:0.88rem;font-weight:500;">${t.name}</span></div><span class="score-pts">${t.total}</span></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+function fmt(secs) { const m=Math.floor(secs/60),s=secs%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+
+let toastTimer=null;
+function toast(msg,type='') {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast show'+(type?' toast-'+type:'');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+function launchConfetti() {
+  const colors=['var(--accent)','var(--orange)','var(--green)','var(--blue)','#fff'],c=document.getElementById('confetti');
+  for (let i=0;i<80;i++) setTimeout(()=>{
+    const p=document.createElement('div'); p.className='confetti-piece';
+    p.style.cssText=`left:${Math.random()*100}%;top:-10px;background:${colors[Math.floor(Math.random()*5)]};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.5}s;transform:rotate(${Math.random()*360}deg);`;
+    c.appendChild(p); setTimeout(()=>p.remove(),3500);
+  },i*20);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+waitDb(async () => { showScreen('landing'); });
+</script>
+</body>
+</html>
